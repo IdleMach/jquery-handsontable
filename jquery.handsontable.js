@@ -6,7 +6,7 @@
  * Licensed under the MIT license.
  * http://handsontable.com/
  *
- * Date: Thu May 02 2013 15:57:49 GMT+1000 (EST)
+ * Date: Thu May 02 2013 16:27:08 GMT+1000 (EST)
  */
 /*jslint white: true, browser: true, plusplus: true, indent: 4, maxerr: 50 */
 
@@ -3955,20 +3955,22 @@ function HandsontableLookupEditorClass(instance) {
   HandsontableLookupEditorClass.prototype.finishEditing = function (isCancelled, ctrlDown) {
       HandsontableAutocompleteEditorClass.prototype.finishEditing.call(this, isCancelled, ctrlDown);
 
-      var name = this.instance.getDataAtCell(this.row, this.col);
-      if (name) {
-          var id = arrayHelper.getIdByName(this.cellProperties.objectSource, name, this.cellProperties.nameField, this.cellProperties.idField);
-          if (id) {
-              this.instance.setDataAtCell(this.row, this.col, id, this);
-              return;
-          }
-      }
-      // if obj found, name is actually an id
-      var obj = arrayHelper.getById(this.cellProperties.objectSource, name, this.cellProperties.idField) || null;
-      if (obj === null && this.originalValue !== name) {
-        var revertId = arrayHelper.getIdByName(this.cellProperties.objectSource, this.originalValue, this.cellProperties.nameField, this.cellProperties.idField);
-        this.instance.setDataAtCell(this.row, this.col, revertId, this);
-      }
+      if (!isCancelled) {
+        var name = this.instance.getDataAtCell(this.row, this.col);
+        if (name) {
+            var id = arrayHelper.getIdByName(this.cellProperties.objectSource, name, this.cellProperties.nameField, this.cellProperties.idField);
+            if (id) {
+                this.instance.setDataAtCell(this.row, this.col, id, this);
+                return;
+            }
+        }
+        // if obj found, name is actually an id
+        var obj = arrayHelper.getById(this.cellProperties.objectSource, name, this.cellProperties.idField) || null;
+        if (obj === null && this.originalValue !== name) {
+          var revertId = arrayHelper.getIdByName(this.cellProperties.objectSource, this.originalValue, this.cellProperties.nameField, this.cellProperties.idField);
+          this.instance.setDataAtCell(this.row, this.col, revertId, this);
+        }
+    }
   };
 
   Handsontable.LookupEditor = function (instance, td, row, col, prop, value, cellProperties) {
