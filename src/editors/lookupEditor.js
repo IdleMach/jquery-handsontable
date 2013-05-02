@@ -63,7 +63,14 @@ function HandsontableLookupEditorClass(instance) {
           var id = arrayHelper.getIdByName(this.cellProperties.objectSource, name, this.cellProperties.nameField, this.cellProperties.idField);
           if (id) {
               this.instance.setDataAtCell(this.row, this.col, id, this);
+              return;
           }
+      }
+      // if obj found, name is actually an id
+      var obj = arrayHelper.getById(this.cellProperties.objectSource, name, this.cellProperties.idField) || null;
+      if (obj === null && this.originalValue !== name) {
+        var revertId = arrayHelper.getIdByName(this.cellProperties.objectSource, this.originalValue, this.cellProperties.nameField, this.cellProperties.idField);
+        this.instance.setDataAtCell(this.row, this.col, revertId, this);
       }
   };
 
