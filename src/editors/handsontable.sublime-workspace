@@ -1,0 +1,589 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"Accoun",
+				"AccountType"
+			],
+			[
+				"fro",
+				"fromAccount"
+			],
+			[
+				"Acc",
+				"AccountContact"
+			],
+			[
+				"oj",
+				"objectSource"
+			],
+			[
+				"g",
+				"getById"
+			],
+			[
+				"obj",
+				"objectSource"
+			],
+			[
+				"gt",
+				"getIdByName"
+			],
+			[
+				"ar",
+				"arrayHelper"
+			],
+			[
+				"ob",
+				"objectSource"
+			],
+			[
+				"Han",
+				"Handsontable"
+			],
+			[
+				"Hands",
+				"HandsontableAutocompleteEditorClass"
+			],
+			[
+				"ex",
+				"excelLookup"
+			],
+			[
+				"c",
+				"cellProperties"
+			],
+			[
+				"chart",
+				"chartAccounts"
+			],
+			[
+				"lo",
+				"LookupCell"
+			],
+			[
+				"ha",
+				"Handsontable"
+			],
+			[
+				"get",
+				"getById"
+			],
+			[
+				"i",
+				"instance"
+			],
+			[
+				"o",
+				"objectSource"
+			],
+			[
+				"Ch",
+				"ChartAccountCode"
+			],
+			[
+				"p_",
+				"p_lookupColumn"
+			],
+			[
+				"id",
+				"idField"
+			],
+			[
+				"fid",
+				"idField"
+			],
+			[
+				"name",
+				"nameField"
+			],
+			[
+				"row",
+				"rowValues"
+			],
+			[
+				"va",
+				"value"
+			],
+			[
+				"if",
+				"idField"
+			],
+			[
+				"for",
+				"for	for (…) {…}"
+			],
+			[
+				"form",
+				"format"
+			],
+			[
+				"l",
+				"location"
+			],
+			[
+				"resp",
+				"responseStatus"
+			],
+			[
+				"view",
+				"viewmodel"
+			],
+			[
+				"st",
+				"style	Tag"
+			],
+			[
+				"jq",
+				"jqXHR"
+			],
+			[
+				"erro",
+				"errorFunction"
+			],
+			[
+				"err",
+				"errorFunction"
+			],
+			[
+				"sta",
+				"state"
+			],
+			[
+				"sign",
+				"signIn"
+			],
+			[
+				"to",
+				"toastAlert"
+			],
+			[
+				"done",
+				"doneAction"
+			],
+			[
+				"don",
+				"doneAction"
+			],
+			[
+				"u",
+				"Username"
+			],
+			[
+				"From",
+				"FromDate"
+			],
+			[
+				"Tra",
+				"TaxRate"
+			],
+			[
+				"Amount",
+				"amountIncTax"
+			],
+			[
+				"amou",
+				"amountIncTax"
+			],
+			[
+				"ta",
+				"taxAmount"
+			],
+			[
+				"am",
+				"Amount"
+			],
+			[
+				"is",
+				"IsTaxed"
+			],
+			[
+				"tax",
+				"TaxRate"
+			],
+			[
+				"fu",
+				"function"
+			],
+			[
+				"com",
+				"computed"
+			],
+			[
+				"version",
+				"versionJSfile"
+			],
+			[
+				"zi",
+				"zipFile"
+			],
+			[
+				"rmo",
+				"remote_deploy"
+			],
+			[
+				"zip",
+				"zipPath"
+			],
+			[
+				"z",
+				"zipName"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "lookupEditor.js",
+			"settings":
+			{
+				"buffer_size": 3514,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 227.0,
+		"selected_items":
+		[
+			[
+				"sub",
+				"SublimeLinter: Show Error List"
+			],
+			[
+				"lin",
+				"SublimeLinter: Show Error List"
+			],
+			[
+				"su",
+				"SublimeLinter: Show Error List"
+			],
+			[
+				"subli",
+				"SublimeLinter: Show Error List"
+			],
+			[
+				"",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 467.0
+	},
+	"console":
+	{
+		"height": 52.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/js/util.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/js/handsontable-lookup copy.js",
+		"/Users/Aaron/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/js/handsontable-lookup.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/js/Handsontable.Lookup.js",
+		"/Users/Aaron/Library/Application Support/Sublime Text 2/Packages/User/SublimeLinter.sublime-settings",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/js/main.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/index.html",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/controllers/invoice.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/js/app.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/controllers/journal.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/views/easter/sand.html",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/js/form.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/js/map-handler.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/js/navigation.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/views/home/releasenotes.htm",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/views/invoice/pay.htm",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/views/registration/activate.htm",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/views/registration/signup.htm",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/controllers/account.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/views/account/reset.htm",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/views/account/forgot.htm",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/js/action.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/controllers/owner.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/controllers/bankdeposits.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/controllers/invitation.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/views/invitation/invite.htm",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/views/invitation/activate.htm",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/controllers/user.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/controllers/registration.js",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/views/user/info.htm",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/views/invoice/edit.htm",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/views/invoice/view.htm",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/js/lookup-handler.js",
+		"/Users/Aaron/Library/Application Support/Sublime Text 2/Packages/SublimeLinter/Default (OSX).sublime-keymap",
+		"/Users/Aaron/Library/Application Support/Sublime Text 2/Packages/User/Default (OSX).sublime-keymap",
+		"/Users/Aaron/Library/Application Support/Sublime Text 2/Packages/SublimeLinter/SublimeLinter.sublime-settings",
+		"/Users/Aaron/Library/Application Support/Sublime Text 2/Packages/User/JSON.sublime-settings",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.ApiHost/app/app.sublime-project",
+		"/Users/Aaron/Documents/Code/pM/pM/pM.sln",
+		"/Users/Aaron/Documents/Code/pM/rakefile",
+		"/Users/Aaron/Desktop/pMdb_2013-04-02.sql",
+		"/Users/Aaron/Documents/Clones:pM/pM.ApiServer/pM.ApiServer.csproj",
+		"/private/var/folders/tg/4lqyq9q13m59n38j78v31pk00000gn/T/fz3temp-1/error.log",
+		"/Shared/madagascar 3 720p/sparks-madagascar3-720.nfo"
+	],
+	"find":
+	{
+		"height": 103.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+			"<open folders>"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"HandsontableLookupEditorClass",
+			"autocomplete",
+			"setDataAtCell",
+			"validateChanges",
+			"onBeforeChange",
+			"createElements",
+			"HandsontableAutocompleteEditorClass",
+			"plugin",
+			"HandsontableAutocompleteEditorClass",
+			".AutocompleteEditor",
+			"AutocompleteEditor",
+			"/////",
+			"///",
+			"AutocompleteEditor",
+			"HandsontableAutocompleteCell",
+			"HandsontableAutocompleteEditor",
+			"HandsontableAutocompleteEditorClass",
+			"AutocompleteEditor",
+			"class",
+			"tabs",
+			"space",
+			"registration",
+			"});\n",
+			"title",
+			"save",
+			"on-save",
+			"();",
+			"sublime",
+			"end",
+			"FromContactRefere",
+			"\"/>\n"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"title",
+			"request"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "lookupEditor.js",
+					"settings":
+					{
+						"buffer_size": 3514,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2340,
+								2340
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": "warning",
+								"box-model": true,
+								"box-sizing": "warning",
+								"compatible-vendor-prefixes": "warning",
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": "warning",
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": "warning",
+								"overqualified-elements": "warning",
+								"qualified-headings": "warning",
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"star-property-hack": "warning",
+								"text-indent": "warning",
+								"underscore-property-hack": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": true,
+								"zero-units": "warning"
+							},
+							"gjslint_ignore":
+							[
+								110.0
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"browser": true,
+								"evil": true,
+								"regexdash": true,
+								"smarttabs": false,
+								"sub": true,
+								"trailing": false,
+								"wsh": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": true,
+							"sublimelinter_delay": 2.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": true,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 598.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 34.0
+	},
+	"input":
+	{
+		"height": 33.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.unsaved_changes":
+	{
+		"height": 100.0
+	},
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 194.0,
+	"status_bar_visible": true
+}
