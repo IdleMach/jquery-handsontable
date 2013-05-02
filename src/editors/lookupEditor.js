@@ -1,4 +1,3 @@
-
 function HandsontableLookupEditorClass(instance) {
       this.isCellEdited = false;
       this.instance = instance;
