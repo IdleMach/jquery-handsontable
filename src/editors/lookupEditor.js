@@ -1,3 +1,31 @@
+var arrayHelper = {
+  select: function (objArray, field) {
+      var result = [];
+      for (var i = 0; i < objArray.length; i++) {
+          result[i] = objArray[i][field];
+      }
+      return result;
+  },
+  getIdByName: function (objArray, name, nameField, idField) {
+      nameField = nameField || "name";
+      for (var i = 0; i < objArray.length; i++) {
+          if (objArray[i][nameField] === name) {
+              return objArray[i][idField];
+          }
+      }
+      return null;
+  },
+  getById: function (objArray, id, idField) {
+      idField = idField || "id";
+      for (var i = 0; i < objArray.length; i++) {
+          if (objArray[i][idField] === id) {
+              return objArray[i];
+          }
+      }
+      return null;
+  }
+};
+
 function HandsontableLookupEditorClass(instance) {
       this.isCellEdited = false;
       this.instance = instance;
