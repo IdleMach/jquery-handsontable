@@ -16,7 +16,7 @@
  * Licensed under the MIT license.
  * http://handsontable.com/
  *
- * Date: Mon Apr 29 2013 02:41:45 GMT+0200 (Central European Daylight Time)
+ * Date: Thu May 02 2013 15:11:46 GMT+1000 (EST)
  */
 /*jslint white: true, browser: true, plusplus: true, indent: 4, maxerr: 50 */
 
@@ -3095,6 +3095,14 @@ Handsontable.NumericRenderer = function (instance, TD, row, col, prop, value, ce
     Handsontable.TextRenderer(instance, TD, row, col, prop, value, cellProperties);
   }
 };
+ Handsontable.LookupRenderer = function (instance, td, row, col, prop, value, cellProperties) {
+      var obj = arrayHelper.getById(cellProperties.objectSource, value, cellProperties.idField);
+      if (obj) {
+          value = obj[cellProperties.nameField];
+      }
+      return Handsontable.AutocompleteRenderer(instance, td, row, col, prop, value, cellProperties);
+  };
+
 function HandsontableTextEditorClass(instance) {
   this.isCellEdited = false;
   this.instance = instance;
@@ -3897,10 +3905,94 @@ Handsontable.HandsontableEditor = function (instance, td, row, col, prop, value,
     instance.handsontableEditor.finishEditing(isCancelled);
   }
 };
+var arrayHelper = {
+  select: function (objArray, field) {
+      var result = [];
+      for (var i = 0; i < objArray.length; i++) {
+          result[i] = objArray[i][field];
+      }
+      return result;
+  },
+  getIdByName: function (objArray, name, nameField, idField) {
+      nameField = nameField || "name";
+      for (var i = 0; i < objArray.length; i++) {
+          if (objArray[i][nameField] === name) {
+              return objArray[i][idField];
+          }
+      }
+      return null;
+  },
+  getById: function (objArray, id, idField) {
+      idField = idField || "id";
+      for (var i = 0; i < objArray.length; i++) {
+          if (objArray[i][idField] === id) {
+              return objArray[i];
+          }
+      }
+      return null;
+  }
+};
+
+function HandsontableLookupEditorClass(instance) {
+      this.isCellEdited = false;
+      this.instance = instance;
+      this.createElements();
+      this.bindEvents();
+      this.emptyStringLabel = '\u00A0\u00A0\u00A0'; //3 non-breaking spaces
+  }
+
+  Handsontable.helper.inherit(HandsontableLookupEditorClass, HandsontableAutocompleteEditorClass);
+
+  HandsontableLookupEditorClass.prototype.createElements = function () {
+      HandsontableAutocompleteEditorClass.prototype.createElements.call(this);
+  };
+
+  HandsontableLookupEditorClass.prototype.bindEvents = function () {
+      HandsontableAutocompleteEditorClass.prototype.bindEvents.call(this);
+  };
+
+  HandsontableLookupEditorClass.prototype.bindTemporaryEvents = function (td, row, col, prop, value, cellProperties) {
+      if (!cellProperties.source) {  // TODO: move to one of the initialization funcitons
+          cellProperties.source = arrayHelper.select(cellProperties.objectSource, cellProperties.nameField);
+      }
+      var obj = arrayHelper.getById(cellProperties.objectSource, value, cellProperties.idField);
+      if (obj) {
+          value = obj[cellProperties.nameField];
+      }
+      HandsontableAutocompleteEditorClass.prototype.bindTemporaryEvents.call(this, td, row, col, prop, value, cellProperties);
+  };
+
+  HandsontableLookupEditorClass.prototype.finishEditing = function (isCancelled, ctrlDown) {
+      HandsontableAutocompleteEditorClass.prototype.finishEditing.call(this, isCancelled, ctrlDown);
+
+      var name = this.instance.getDataAtCell(this.row, this.col);
+      if (name) {
+          var id = arrayHelper.getIdByName(this.cellProperties.objectSource, name, this.cellProperties.nameField, this.cellProperties.idField);
+          if (id) {
+              this.instance.setDataAtCell(this.row, this.col, id, this);
+          }
+      }
+  };
+
+  Handsontable.LookupEditor = function (instance, td, row, col, prop, value, cellProperties) {
+    if (!instance.lookupEditor) {
+      instance.lookupEditor = new HandsontableLookupEditorClass(instance);
+    }
+    instance.lookupEditor.bindTemporaryEvents(td, row, col, prop, value, cellProperties);
+    return function (isCancelled) {
+      instance.lookupEditor.finishEditing(isCancelled);
+    };
+};
+
 /**
  * Cell type is just a shortcut for setting bunch of cellProperties (used in getCellMeta)
  */
 
+Handsontable.LookupCell = {
+    renderer: Handsontable.LookupRenderer,
+    editor: Handsontable.LookupEditor
+};
+    
 Handsontable.AutocompleteCell = {
   renderer: Handsontable.AutocompleteRenderer,
   editor: Handsontable.AutocompleteEditor
@@ -3934,6 +4026,7 @@ Handsontable.HandsontableCell = {
 
 //here setup the friendly aliases that are used by cellProperties.type
 Handsontable.cellTypes = {
+  lookup = Handsontable.LookupCell,
   autocomplete: Handsontable.AutocompleteCell,
   checkbox: Handsontable.CheckboxCell,
   text: Handsontable.TextCell,
@@ -3941,6 +4034,7 @@ Handsontable.cellTypes = {
   date: Handsontable.DateCell,
   handsontable: Handsontable.HandsontableCell
 };
+
 Handsontable.PluginHooks = {
   hooks: {
     beforeInit: [],
@@ -7977,7 +8071,7 @@ function handler(event) {
     }
 
     , highlighter: function (item) {
-      var query = this.query.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&')
+      var query = this.query.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\@@model')
       return item.replace(new RegExp('(' + query + ')', 'ig'), function ($1, match) {
         return '<strong>' + match + '</strong>'
       })
@@ -8228,7 +8322,76 @@ function handler(event) {
         output = (Math.round(value * power) / power).toFixed(precision);
 
         if (optionals) {
-            var optionalsRegExp = new RegExp('0{1,' + optionals + '}$');
+            var optionalsRegExp = new RegExp('0{1,' + optionals + '}
+
+window.numeral = this.numeral; //needed by numeral.de-de.js
+
+function parseDatacolumn(DATACOLUMN) {
+  var obj = {};
+
+  for (var i = 0, ilen = DATACOLUMN.attributes.length; i < ilen; i++) {
+    obj[DATACOLUMN.attributes[i].name] = DATACOLUMN.attributes[i].value || true;
+  }
+
+  obj.data = obj.value;
+  delete obj.value;
+
+  obj.readOnly = obj.readonly;
+  delete obj.readonly;
+
+  obj.checkedTemplate = obj.checkedtemplate;
+  delete obj.checkedtemplate;
+
+  obj.uncheckedTemplate = obj.uncheckedtemplate;
+  delete obj.uncheckedtemplate;
+
+  if (obj.type === 'autocomplete' && typeof obj.source === 'string') {
+    obj.source = window[obj.source];
+  }
+
+  return obj;
+}
+
+var publicMethods = ['updateSettings', 'loadData', 'render', 'setDataAtCell', 'setDataAtRowProp', 'getDataAtCell', 'getDataAtRowProp', 'countRows', 'countCols', 'rowOffset', 'colOffset', 'countVisibleRows', 'countVisibleCols', 'clear', 'clearUndo', 'getData', 'alter', 'getCell', 'getCellMeta', 'selectCell', 'deselectCell', 'getSelected', 'destroyEditor', 'getRowHeader', 'getColHeader', 'destroy', 'isUndoAvailable', 'isRedoAvailable', 'undo', 'redo', 'countEmptyRows', 'countEmptyCols', 'isEmptyRow', 'isEmptyCol', 'parseSettingsFromDOM'];
+
+var publish = {};
+for (var i = 0, ilen = publicMethods.length; i < ilen; i++) {
+  publish[publicMethods[i]] = (function (methodName) {
+    return function () {
+      return this.instance[methodName].apply(this.instance, arguments);
+    }
+  })(publicMethods[i]);
+}
+
+Toolkit.register(this, {
+  instance: null,
+  ready: function () {
+    var DATACOLUMNs = this.querySelectorAll('datacolumn');
+    var columns = [];
+    for (var i = 0, ilen = DATACOLUMNs.length; i < ilen; i++) {
+      columns.push(parseDatacolumn(DATACOLUMNs[i]));
+    }
+
+    var options = {
+      data: window[this.datarows],
+      columns: columns,
+      minRows: 5,
+      minCols: 6,
+      minSpareRows: 1,
+      autoWrapRow: true,
+      colHeaders: true,
+      contextMenu: true
+    };
+
+    jQuery(this.$.htContainer).handsontable(options);
+
+    this.instance = jQuery(this.$.htContainer).data('handsontable');
+  },
+  publish: publish
+});
+  </script>
+</element>
+);
             output = output.replace(optionalsRegExp, '');
         }
 
@@ -8244,7 +8407,76 @@ function handler(event) {
         var output;
 
         // figure out what kind of format we are dealing with
-        if (format.indexOf('$') > -1) { // currency!!!!!
+        if (format.indexOf('
+
+window.numeral = this.numeral; //needed by numeral.de-de.js
+
+function parseDatacolumn(DATACOLUMN) {
+  var obj = {};
+
+  for (var i = 0, ilen = DATACOLUMN.attributes.length; i < ilen; i++) {
+    obj[DATACOLUMN.attributes[i].name] = DATACOLUMN.attributes[i].value || true;
+  }
+
+  obj.data = obj.value;
+  delete obj.value;
+
+  obj.readOnly = obj.readonly;
+  delete obj.readonly;
+
+  obj.checkedTemplate = obj.checkedtemplate;
+  delete obj.checkedtemplate;
+
+  obj.uncheckedTemplate = obj.uncheckedtemplate;
+  delete obj.uncheckedtemplate;
+
+  if (obj.type === 'autocomplete' && typeof obj.source === 'string') {
+    obj.source = window[obj.source];
+  }
+
+  return obj;
+}
+
+var publicMethods = ['updateSettings', 'loadData', 'render', 'setDataAtCell', 'setDataAtRowProp', 'getDataAtCell', 'getDataAtRowProp', 'countRows', 'countCols', 'rowOffset', 'colOffset', 'countVisibleRows', 'countVisibleCols', 'clear', 'clearUndo', 'getData', 'alter', 'getCell', 'getCellMeta', 'selectCell', 'deselectCell', 'getSelected', 'destroyEditor', 'getRowHeader', 'getColHeader', 'destroy', 'isUndoAvailable', 'isRedoAvailable', 'undo', 'redo', 'countEmptyRows', 'countEmptyCols', 'isEmptyRow', 'isEmptyCol', 'parseSettingsFromDOM'];
+
+var publish = {};
+for (var i = 0, ilen = publicMethods.length; i < ilen; i++) {
+  publish[publicMethods[i]] = (function (methodName) {
+    return function () {
+      return this.instance[methodName].apply(this.instance, arguments);
+    }
+  })(publicMethods[i]);
+}
+
+Toolkit.register(this, {
+  instance: null,
+  ready: function () {
+    var DATACOLUMNs = this.querySelectorAll('datacolumn');
+    var columns = [];
+    for (var i = 0, ilen = DATACOLUMNs.length; i < ilen; i++) {
+      columns.push(parseDatacolumn(DATACOLUMNs[i]));
+    }
+
+    var options = {
+      data: window[this.datarows],
+      columns: columns,
+      minRows: 5,
+      minCols: 6,
+      minSpareRows: 1,
+      autoWrapRow: true,
+      colHeaders: true,
+      contextMenu: true
+    };
+
+    jQuery(this.$.htContainer).handsontable(options);
+
+    this.instance = jQuery(this.$.htContainer).data('handsontable');
+  },
+  publish: publish
+});
+  </script>
+</element>
+) > -1) { // currency!!!!!
             output = formatCurrency(n, format);
         } else if (format.indexOf('%') > -1) { // percentage
             output = formatPercentage(n, format);
@@ -8272,10 +8504,286 @@ function handler(event) {
                 }
 
                 // see if abbreviations are there so that we can multiply to the correct number
-                var thousandRegExp = new RegExp(languages[currentLanguage].abbreviations.thousand + '(?:\\)|(\\' + languages[currentLanguage].currency.symbol + ')?(?:\\))?)?$'),
-                    millionRegExp = new RegExp(languages[currentLanguage].abbreviations.million + '(?:\\)|(\\' + languages[currentLanguage].currency.symbol + ')?(?:\\))?)?$'),
-                    billionRegExp = new RegExp(languages[currentLanguage].abbreviations.billion + '(?:\\)|(\\' + languages[currentLanguage].currency.symbol + ')?(?:\\))?)?$'),
-                    trillionRegExp = new RegExp(languages[currentLanguage].abbreviations.trillion + '(?:\\)|(\\' + languages[currentLanguage].currency.symbol + ')?(?:\\))?)?$');
+                var thousandRegExp = new RegExp(languages[currentLanguage].abbreviations.thousand + '(?:\\)|(\\' + languages[currentLanguage].currency.symbol + ')?(?:\\))?)?
+
+window.numeral = this.numeral; //needed by numeral.de-de.js
+
+function parseDatacolumn(DATACOLUMN) {
+  var obj = {};
+
+  for (var i = 0, ilen = DATACOLUMN.attributes.length; i < ilen; i++) {
+    obj[DATACOLUMN.attributes[i].name] = DATACOLUMN.attributes[i].value || true;
+  }
+
+  obj.data = obj.value;
+  delete obj.value;
+
+  obj.readOnly = obj.readonly;
+  delete obj.readonly;
+
+  obj.checkedTemplate = obj.checkedtemplate;
+  delete obj.checkedtemplate;
+
+  obj.uncheckedTemplate = obj.uncheckedtemplate;
+  delete obj.uncheckedtemplate;
+
+  if (obj.type === 'autocomplete' && typeof obj.source === 'string') {
+    obj.source = window[obj.source];
+  }
+
+  return obj;
+}
+
+var publicMethods = ['updateSettings', 'loadData', 'render', 'setDataAtCell', 'setDataAtRowProp', 'getDataAtCell', 'getDataAtRowProp', 'countRows', 'countCols', 'rowOffset', 'colOffset', 'countVisibleRows', 'countVisibleCols', 'clear', 'clearUndo', 'getData', 'alter', 'getCell', 'getCellMeta', 'selectCell', 'deselectCell', 'getSelected', 'destroyEditor', 'getRowHeader', 'getColHeader', 'destroy', 'isUndoAvailable', 'isRedoAvailable', 'undo', 'redo', 'countEmptyRows', 'countEmptyCols', 'isEmptyRow', 'isEmptyCol', 'parseSettingsFromDOM'];
+
+var publish = {};
+for (var i = 0, ilen = publicMethods.length; i < ilen; i++) {
+  publish[publicMethods[i]] = (function (methodName) {
+    return function () {
+      return this.instance[methodName].apply(this.instance, arguments);
+    }
+  })(publicMethods[i]);
+}
+
+Toolkit.register(this, {
+  instance: null,
+  ready: function () {
+    var DATACOLUMNs = this.querySelectorAll('datacolumn');
+    var columns = [];
+    for (var i = 0, ilen = DATACOLUMNs.length; i < ilen; i++) {
+      columns.push(parseDatacolumn(DATACOLUMNs[i]));
+    }
+
+    var options = {
+      data: window[this.datarows],
+      columns: columns,
+      minRows: 5,
+      minCols: 6,
+      minSpareRows: 1,
+      autoWrapRow: true,
+      colHeaders: true,
+      contextMenu: true
+    };
+
+    jQuery(this.$.htContainer).handsontable(options);
+
+    this.instance = jQuery(this.$.htContainer).data('handsontable');
+  },
+  publish: publish
+});
+  </script>
+</element>
+),
+                    millionRegExp = new RegExp(languages[currentLanguage].abbreviations.million + '(?:\\)|(\\' + languages[currentLanguage].currency.symbol + ')?(?:\\))?)?
+
+window.numeral = this.numeral; //needed by numeral.de-de.js
+
+function parseDatacolumn(DATACOLUMN) {
+  var obj = {};
+
+  for (var i = 0, ilen = DATACOLUMN.attributes.length; i < ilen; i++) {
+    obj[DATACOLUMN.attributes[i].name] = DATACOLUMN.attributes[i].value || true;
+  }
+
+  obj.data = obj.value;
+  delete obj.value;
+
+  obj.readOnly = obj.readonly;
+  delete obj.readonly;
+
+  obj.checkedTemplate = obj.checkedtemplate;
+  delete obj.checkedtemplate;
+
+  obj.uncheckedTemplate = obj.uncheckedtemplate;
+  delete obj.uncheckedtemplate;
+
+  if (obj.type === 'autocomplete' && typeof obj.source === 'string') {
+    obj.source = window[obj.source];
+  }
+
+  return obj;
+}
+
+var publicMethods = ['updateSettings', 'loadData', 'render', 'setDataAtCell', 'setDataAtRowProp', 'getDataAtCell', 'getDataAtRowProp', 'countRows', 'countCols', 'rowOffset', 'colOffset', 'countVisibleRows', 'countVisibleCols', 'clear', 'clearUndo', 'getData', 'alter', 'getCell', 'getCellMeta', 'selectCell', 'deselectCell', 'getSelected', 'destroyEditor', 'getRowHeader', 'getColHeader', 'destroy', 'isUndoAvailable', 'isRedoAvailable', 'undo', 'redo', 'countEmptyRows', 'countEmptyCols', 'isEmptyRow', 'isEmptyCol', 'parseSettingsFromDOM'];
+
+var publish = {};
+for (var i = 0, ilen = publicMethods.length; i < ilen; i++) {
+  publish[publicMethods[i]] = (function (methodName) {
+    return function () {
+      return this.instance[methodName].apply(this.instance, arguments);
+    }
+  })(publicMethods[i]);
+}
+
+Toolkit.register(this, {
+  instance: null,
+  ready: function () {
+    var DATACOLUMNs = this.querySelectorAll('datacolumn');
+    var columns = [];
+    for (var i = 0, ilen = DATACOLUMNs.length; i < ilen; i++) {
+      columns.push(parseDatacolumn(DATACOLUMNs[i]));
+    }
+
+    var options = {
+      data: window[this.datarows],
+      columns: columns,
+      minRows: 5,
+      minCols: 6,
+      minSpareRows: 1,
+      autoWrapRow: true,
+      colHeaders: true,
+      contextMenu: true
+    };
+
+    jQuery(this.$.htContainer).handsontable(options);
+
+    this.instance = jQuery(this.$.htContainer).data('handsontable');
+  },
+  publish: publish
+});
+  </script>
+</element>
+),
+                    billionRegExp = new RegExp(languages[currentLanguage].abbreviations.billion + '(?:\\)|(\\' + languages[currentLanguage].currency.symbol + ')?(?:\\))?)?
+
+window.numeral = this.numeral; //needed by numeral.de-de.js
+
+function parseDatacolumn(DATACOLUMN) {
+  var obj = {};
+
+  for (var i = 0, ilen = DATACOLUMN.attributes.length; i < ilen; i++) {
+    obj[DATACOLUMN.attributes[i].name] = DATACOLUMN.attributes[i].value || true;
+  }
+
+  obj.data = obj.value;
+  delete obj.value;
+
+  obj.readOnly = obj.readonly;
+  delete obj.readonly;
+
+  obj.checkedTemplate = obj.checkedtemplate;
+  delete obj.checkedtemplate;
+
+  obj.uncheckedTemplate = obj.uncheckedtemplate;
+  delete obj.uncheckedtemplate;
+
+  if (obj.type === 'autocomplete' && typeof obj.source === 'string') {
+    obj.source = window[obj.source];
+  }
+
+  return obj;
+}
+
+var publicMethods = ['updateSettings', 'loadData', 'render', 'setDataAtCell', 'setDataAtRowProp', 'getDataAtCell', 'getDataAtRowProp', 'countRows', 'countCols', 'rowOffset', 'colOffset', 'countVisibleRows', 'countVisibleCols', 'clear', 'clearUndo', 'getData', 'alter', 'getCell', 'getCellMeta', 'selectCell', 'deselectCell', 'getSelected', 'destroyEditor', 'getRowHeader', 'getColHeader', 'destroy', 'isUndoAvailable', 'isRedoAvailable', 'undo', 'redo', 'countEmptyRows', 'countEmptyCols', 'isEmptyRow', 'isEmptyCol', 'parseSettingsFromDOM'];
+
+var publish = {};
+for (var i = 0, ilen = publicMethods.length; i < ilen; i++) {
+  publish[publicMethods[i]] = (function (methodName) {
+    return function () {
+      return this.instance[methodName].apply(this.instance, arguments);
+    }
+  })(publicMethods[i]);
+}
+
+Toolkit.register(this, {
+  instance: null,
+  ready: function () {
+    var DATACOLUMNs = this.querySelectorAll('datacolumn');
+    var columns = [];
+    for (var i = 0, ilen = DATACOLUMNs.length; i < ilen; i++) {
+      columns.push(parseDatacolumn(DATACOLUMNs[i]));
+    }
+
+    var options = {
+      data: window[this.datarows],
+      columns: columns,
+      minRows: 5,
+      minCols: 6,
+      minSpareRows: 1,
+      autoWrapRow: true,
+      colHeaders: true,
+      contextMenu: true
+    };
+
+    jQuery(this.$.htContainer).handsontable(options);
+
+    this.instance = jQuery(this.$.htContainer).data('handsontable');
+  },
+  publish: publish
+});
+  </script>
+</element>
+),
+                    trillionRegExp = new RegExp(languages[currentLanguage].abbreviations.trillion + '(?:\\)|(\\' + languages[currentLanguage].currency.symbol + ')?(?:\\))?)?
+
+window.numeral = this.numeral; //needed by numeral.de-de.js
+
+function parseDatacolumn(DATACOLUMN) {
+  var obj = {};
+
+  for (var i = 0, ilen = DATACOLUMN.attributes.length; i < ilen; i++) {
+    obj[DATACOLUMN.attributes[i].name] = DATACOLUMN.attributes[i].value || true;
+  }
+
+  obj.data = obj.value;
+  delete obj.value;
+
+  obj.readOnly = obj.readonly;
+  delete obj.readonly;
+
+  obj.checkedTemplate = obj.checkedtemplate;
+  delete obj.checkedtemplate;
+
+  obj.uncheckedTemplate = obj.uncheckedtemplate;
+  delete obj.uncheckedtemplate;
+
+  if (obj.type === 'autocomplete' && typeof obj.source === 'string') {
+    obj.source = window[obj.source];
+  }
+
+  return obj;
+}
+
+var publicMethods = ['updateSettings', 'loadData', 'render', 'setDataAtCell', 'setDataAtRowProp', 'getDataAtCell', 'getDataAtRowProp', 'countRows', 'countCols', 'rowOffset', 'colOffset', 'countVisibleRows', 'countVisibleCols', 'clear', 'clearUndo', 'getData', 'alter', 'getCell', 'getCellMeta', 'selectCell', 'deselectCell', 'getSelected', 'destroyEditor', 'getRowHeader', 'getColHeader', 'destroy', 'isUndoAvailable', 'isRedoAvailable', 'undo', 'redo', 'countEmptyRows', 'countEmptyCols', 'isEmptyRow', 'isEmptyCol', 'parseSettingsFromDOM'];
+
+var publish = {};
+for (var i = 0, ilen = publicMethods.length; i < ilen; i++) {
+  publish[publicMethods[i]] = (function (methodName) {
+    return function () {
+      return this.instance[methodName].apply(this.instance, arguments);
+    }
+  })(publicMethods[i]);
+}
+
+Toolkit.register(this, {
+  instance: null,
+  ready: function () {
+    var DATACOLUMNs = this.querySelectorAll('datacolumn');
+    var columns = [];
+    for (var i = 0, ilen = DATACOLUMNs.length; i < ilen; i++) {
+      columns.push(parseDatacolumn(DATACOLUMNs[i]));
+    }
+
+    var options = {
+      data: window[this.datarows],
+      columns: columns,
+      minRows: 5,
+      minCols: 6,
+      minSpareRows: 1,
+      autoWrapRow: true,
+      colHeaders: true,
+      contextMenu: true
+    };
+
+    jQuery(this.$.htContainer).handsontable(options);
+
+    this.instance = jQuery(this.$.htContainer).data('handsontable');
+  },
+  publish: publish
+});
+  </script>
+</element>
+);
 
                 // see if bytes are there so that we can multiply to the correct number
                 var prefixes = ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
@@ -8300,20 +8808,296 @@ function handler(event) {
     }
 
     function formatCurrency (n, format) {
-        var prependSymbol = (format.indexOf('$') <= 1) ? true : false;
+        var prependSymbol = (format.indexOf('
+
+window.numeral = this.numeral; //needed by numeral.de-de.js
+
+function parseDatacolumn(DATACOLUMN) {
+  var obj = {};
+
+  for (var i = 0, ilen = DATACOLUMN.attributes.length; i < ilen; i++) {
+    obj[DATACOLUMN.attributes[i].name] = DATACOLUMN.attributes[i].value || true;
+  }
+
+  obj.data = obj.value;
+  delete obj.value;
+
+  obj.readOnly = obj.readonly;
+  delete obj.readonly;
+
+  obj.checkedTemplate = obj.checkedtemplate;
+  delete obj.checkedtemplate;
+
+  obj.uncheckedTemplate = obj.uncheckedtemplate;
+  delete obj.uncheckedtemplate;
+
+  if (obj.type === 'autocomplete' && typeof obj.source === 'string') {
+    obj.source = window[obj.source];
+  }
+
+  return obj;
+}
+
+var publicMethods = ['updateSettings', 'loadData', 'render', 'setDataAtCell', 'setDataAtRowProp', 'getDataAtCell', 'getDataAtRowProp', 'countRows', 'countCols', 'rowOffset', 'colOffset', 'countVisibleRows', 'countVisibleCols', 'clear', 'clearUndo', 'getData', 'alter', 'getCell', 'getCellMeta', 'selectCell', 'deselectCell', 'getSelected', 'destroyEditor', 'getRowHeader', 'getColHeader', 'destroy', 'isUndoAvailable', 'isRedoAvailable', 'undo', 'redo', 'countEmptyRows', 'countEmptyCols', 'isEmptyRow', 'isEmptyCol', 'parseSettingsFromDOM'];
+
+var publish = {};
+for (var i = 0, ilen = publicMethods.length; i < ilen; i++) {
+  publish[publicMethods[i]] = (function (methodName) {
+    return function () {
+      return this.instance[methodName].apply(this.instance, arguments);
+    }
+  })(publicMethods[i]);
+}
+
+Toolkit.register(this, {
+  instance: null,
+  ready: function () {
+    var DATACOLUMNs = this.querySelectorAll('datacolumn');
+    var columns = [];
+    for (var i = 0, ilen = DATACOLUMNs.length; i < ilen; i++) {
+      columns.push(parseDatacolumn(DATACOLUMNs[i]));
+    }
+
+    var options = {
+      data: window[this.datarows],
+      columns: columns,
+      minRows: 5,
+      minCols: 6,
+      minSpareRows: 1,
+      autoWrapRow: true,
+      colHeaders: true,
+      contextMenu: true
+    };
+
+    jQuery(this.$.htContainer).handsontable(options);
+
+    this.instance = jQuery(this.$.htContainer).data('handsontable');
+  },
+  publish: publish
+});
+  </script>
+</element>
+) <= 1) ? true : false;
 
         // remove $ for the moment
         var space = '';
 
         // check for space before or after currency
-        if (format.indexOf(' $') > -1) {
+        if (format.indexOf(' 
+
+window.numeral = this.numeral; //needed by numeral.de-de.js
+
+function parseDatacolumn(DATACOLUMN) {
+  var obj = {};
+
+  for (var i = 0, ilen = DATACOLUMN.attributes.length; i < ilen; i++) {
+    obj[DATACOLUMN.attributes[i].name] = DATACOLUMN.attributes[i].value || true;
+  }
+
+  obj.data = obj.value;
+  delete obj.value;
+
+  obj.readOnly = obj.readonly;
+  delete obj.readonly;
+
+  obj.checkedTemplate = obj.checkedtemplate;
+  delete obj.checkedtemplate;
+
+  obj.uncheckedTemplate = obj.uncheckedtemplate;
+  delete obj.uncheckedtemplate;
+
+  if (obj.type === 'autocomplete' && typeof obj.source === 'string') {
+    obj.source = window[obj.source];
+  }
+
+  return obj;
+}
+
+var publicMethods = ['updateSettings', 'loadData', 'render', 'setDataAtCell', 'setDataAtRowProp', 'getDataAtCell', 'getDataAtRowProp', 'countRows', 'countCols', 'rowOffset', 'colOffset', 'countVisibleRows', 'countVisibleCols', 'clear', 'clearUndo', 'getData', 'alter', 'getCell', 'getCellMeta', 'selectCell', 'deselectCell', 'getSelected', 'destroyEditor', 'getRowHeader', 'getColHeader', 'destroy', 'isUndoAvailable', 'isRedoAvailable', 'undo', 'redo', 'countEmptyRows', 'countEmptyCols', 'isEmptyRow', 'isEmptyCol', 'parseSettingsFromDOM'];
+
+var publish = {};
+for (var i = 0, ilen = publicMethods.length; i < ilen; i++) {
+  publish[publicMethods[i]] = (function (methodName) {
+    return function () {
+      return this.instance[methodName].apply(this.instance, arguments);
+    }
+  })(publicMethods[i]);
+}
+
+Toolkit.register(this, {
+  instance: null,
+  ready: function () {
+    var DATACOLUMNs = this.querySelectorAll('datacolumn');
+    var columns = [];
+    for (var i = 0, ilen = DATACOLUMNs.length; i < ilen; i++) {
+      columns.push(parseDatacolumn(DATACOLUMNs[i]));
+    }
+
+    var options = {
+      data: window[this.datarows],
+      columns: columns,
+      minRows: 5,
+      minCols: 6,
+      minSpareRows: 1,
+      autoWrapRow: true,
+      colHeaders: true,
+      contextMenu: true
+    };
+
+    jQuery(this.$.htContainer).handsontable(options);
+
+    this.instance = jQuery(this.$.htContainer).data('handsontable');
+  },
+  publish: publish
+});
+  </script>
+</element>
+) > -1) {
             space = ' ';
-            format = format.replace(' $', '');
+            format = format.replace(' 
+
+window.numeral = this.numeral; //needed by numeral.de-de.js
+
+function parseDatacolumn(DATACOLUMN) {
+  var obj = {};
+
+  for (var i = 0, ilen = DATACOLUMN.attributes.length; i < ilen; i++) {
+    obj[DATACOLUMN.attributes[i].name] = DATACOLUMN.attributes[i].value || true;
+  }
+
+  obj.data = obj.value;
+  delete obj.value;
+
+  obj.readOnly = obj.readonly;
+  delete obj.readonly;
+
+  obj.checkedTemplate = obj.checkedtemplate;
+  delete obj.checkedtemplate;
+
+  obj.uncheckedTemplate = obj.uncheckedtemplate;
+  delete obj.uncheckedtemplate;
+
+  if (obj.type === 'autocomplete' && typeof obj.source === 'string') {
+    obj.source = window[obj.source];
+  }
+
+  return obj;
+}
+
+var publicMethods = ['updateSettings', 'loadData', 'render', 'setDataAtCell', 'setDataAtRowProp', 'getDataAtCell', 'getDataAtRowProp', 'countRows', 'countCols', 'rowOffset', 'colOffset', 'countVisibleRows', 'countVisibleCols', 'clear', 'clearUndo', 'getData', 'alter', 'getCell', 'getCellMeta', 'selectCell', 'deselectCell', 'getSelected', 'destroyEditor', 'getRowHeader', 'getColHeader', 'destroy', 'isUndoAvailable', 'isRedoAvailable', 'undo', 'redo', 'countEmptyRows', 'countEmptyCols', 'isEmptyRow', 'isEmptyCol', 'parseSettingsFromDOM'];
+
+var publish = {};
+for (var i = 0, ilen = publicMethods.length; i < ilen; i++) {
+  publish[publicMethods[i]] = (function (methodName) {
+    return function () {
+      return this.instance[methodName].apply(this.instance, arguments);
+    }
+  })(publicMethods[i]);
+}
+
+Toolkit.register(this, {
+  instance: null,
+  ready: function () {
+    var DATACOLUMNs = this.querySelectorAll('datacolumn');
+    var columns = [];
+    for (var i = 0, ilen = DATACOLUMNs.length; i < ilen; i++) {
+      columns.push(parseDatacolumn(DATACOLUMNs[i]));
+    }
+
+    var options = {
+      data: window[this.datarows],
+      columns: columns,
+      minRows: 5,
+      minCols: 6,
+      minSpareRows: 1,
+      autoWrapRow: true,
+      colHeaders: true,
+      contextMenu: true
+    };
+
+    jQuery(this.$.htContainer).handsontable(options);
+
+    this.instance = jQuery(this.$.htContainer).data('handsontable');
+  },
+  publish: publish
+});
+  </script>
+</element>
+, '');
         } else if (format.indexOf('$ ') > -1) {
             space = ' ';
             format = format.replace('$ ', '');
         } else {
-            format = format.replace('$', '');
+            format = format.replace('
+
+window.numeral = this.numeral; //needed by numeral.de-de.js
+
+function parseDatacolumn(DATACOLUMN) {
+  var obj = {};
+
+  for (var i = 0, ilen = DATACOLUMN.attributes.length; i < ilen; i++) {
+    obj[DATACOLUMN.attributes[i].name] = DATACOLUMN.attributes[i].value || true;
+  }
+
+  obj.data = obj.value;
+  delete obj.value;
+
+  obj.readOnly = obj.readonly;
+  delete obj.readonly;
+
+  obj.checkedTemplate = obj.checkedtemplate;
+  delete obj.checkedtemplate;
+
+  obj.uncheckedTemplate = obj.uncheckedtemplate;
+  delete obj.uncheckedtemplate;
+
+  if (obj.type === 'autocomplete' && typeof obj.source === 'string') {
+    obj.source = window[obj.source];
+  }
+
+  return obj;
+}
+
+var publicMethods = ['updateSettings', 'loadData', 'render', 'setDataAtCell', 'setDataAtRowProp', 'getDataAtCell', 'getDataAtRowProp', 'countRows', 'countCols', 'rowOffset', 'colOffset', 'countVisibleRows', 'countVisibleCols', 'clear', 'clearUndo', 'getData', 'alter', 'getCell', 'getCellMeta', 'selectCell', 'deselectCell', 'getSelected', 'destroyEditor', 'getRowHeader', 'getColHeader', 'destroy', 'isUndoAvailable', 'isRedoAvailable', 'undo', 'redo', 'countEmptyRows', 'countEmptyCols', 'isEmptyRow', 'isEmptyCol', 'parseSettingsFromDOM'];
+
+var publish = {};
+for (var i = 0, ilen = publicMethods.length; i < ilen; i++) {
+  publish[publicMethods[i]] = (function (methodName) {
+    return function () {
+      return this.instance[methodName].apply(this.instance, arguments);
+    }
+  })(publicMethods[i]);
+}
+
+Toolkit.register(this, {
+  instance: null,
+  ready: function () {
+    var DATACOLUMNs = this.querySelectorAll('datacolumn');
+    var columns = [];
+    for (var i = 0, ilen = DATACOLUMNs.length; i < ilen; i++) {
+      columns.push(parseDatacolumn(DATACOLUMNs[i]));
+    }
+
+    var options = {
+      data: window[this.datarows],
+      columns: columns,
+      minRows: 5,
+      minCols: 6,
+      minSpareRows: 1,
+      autoWrapRow: true,
+      colHeaders: true,
+      contextMenu: true
+    };
+
+    jQuery(this.$.htContainer).handsontable(options);
+
+    this.instance = jQuery(this.$.htContainer).data('handsontable');
+  },
+  publish: publish
+});
+  </script>
+</element>
+, '');
         }
 
         // format the number
@@ -8591,7 +9375,76 @@ function handler(event) {
                 (b === 3) ? 'rd' : 'th';
         },
         currency: {
-            symbol: '$'
+            symbol: '
+
+window.numeral = this.numeral; //needed by numeral.de-de.js
+
+function parseDatacolumn(DATACOLUMN) {
+  var obj = {};
+
+  for (var i = 0, ilen = DATACOLUMN.attributes.length; i < ilen; i++) {
+    obj[DATACOLUMN.attributes[i].name] = DATACOLUMN.attributes[i].value || true;
+  }
+
+  obj.data = obj.value;
+  delete obj.value;
+
+  obj.readOnly = obj.readonly;
+  delete obj.readonly;
+
+  obj.checkedTemplate = obj.checkedtemplate;
+  delete obj.checkedtemplate;
+
+  obj.uncheckedTemplate = obj.uncheckedtemplate;
+  delete obj.uncheckedtemplate;
+
+  if (obj.type === 'autocomplete' && typeof obj.source === 'string') {
+    obj.source = window[obj.source];
+  }
+
+  return obj;
+}
+
+var publicMethods = ['updateSettings', 'loadData', 'render', 'setDataAtCell', 'setDataAtRowProp', 'getDataAtCell', 'getDataAtRowProp', 'countRows', 'countCols', 'rowOffset', 'colOffset', 'countVisibleRows', 'countVisibleCols', 'clear', 'clearUndo', 'getData', 'alter', 'getCell', 'getCellMeta', 'selectCell', 'deselectCell', 'getSelected', 'destroyEditor', 'getRowHeader', 'getColHeader', 'destroy', 'isUndoAvailable', 'isRedoAvailable', 'undo', 'redo', 'countEmptyRows', 'countEmptyCols', 'isEmptyRow', 'isEmptyCol', 'parseSettingsFromDOM'];
+
+var publish = {};
+for (var i = 0, ilen = publicMethods.length; i < ilen; i++) {
+  publish[publicMethods[i]] = (function (methodName) {
+    return function () {
+      return this.instance[methodName].apply(this.instance, arguments);
+    }
+  })(publicMethods[i]);
+}
+
+Toolkit.register(this, {
+  instance: null,
+  ready: function () {
+    var DATACOLUMNs = this.querySelectorAll('datacolumn');
+    var columns = [];
+    for (var i = 0, ilen = DATACOLUMNs.length; i < ilen; i++) {
+      columns.push(parseDatacolumn(DATACOLUMNs[i]));
+    }
+
+    var options = {
+      data: window[this.datarows],
+      columns: columns,
+      minRows: 5,
+      minCols: 6,
+      minSpareRows: 1,
+      autoWrapRow: true,
+      colHeaders: true,
+      contextMenu: true
+    };
+
+    jQuery(this.$.htContainer).handsontable(options);
+
+    this.instance = jQuery(this.$.htContainer).data('handsontable');
+  },
+  publish: publish
+});
+  </script>
+</element>
+
         }
     });
 
