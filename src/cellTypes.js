@@ -40,7 +40,7 @@ Handsontable.HandsontableCell = {
 
 //here setup the friendly aliases that are used by cellProperties.type
 Handsontable.cellTypes = {
-  lookup = Handsontable.LookupCell,
+  lookup: Handsontable.LookupCell,
   autocomplete: Handsontable.AutocompleteCell,
   checkbox: Handsontable.CheckboxCell,
   text: Handsontable.TextCell,
